@@ -1,105 +1,112 @@
 import "./Capture.css";
-import {
-  Camera,
-  CameraResultType,
-  CameraSource,
-  Photo,
-} from "@capacitor/camera";
-import { Filesystem, Directory } from "@capacitor/filesystem";
-import { Preferences } from "@capacitor/preferences";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { useCallback, useRef, useState } from "react";
 import Cropper from "react-perspective-cropper";
 import { IonButton } from "@ionic/react";
-import {
-  IonCard,
-  IonCardContent,
-} from "@ionic/react";
 
 interface CaptureProps {}
 
 const Capture: React.FC<CaptureProps> = () => {
-  const [photo, setPhoto] = useState<{ url: string | File; file: any }>({url: '', file: null});
-  const [cropState, setCropState] = useState<{loading: boolean}>();
+  const [docUri, setDocUri] = useState<string>("");
+  const [result, setResult] = useState<Blob>();
+  const [cropState, setCropState] = useState<any>();
   const cropperRef = useRef<any>();
   const onChange = useCallback((s: any) => setCropState(s), []);
   const onDragStop = useCallback((s: any) => setCropState(s), []);
 
-  const addNewToGallery = async () => {
+  const capture = async () => {
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
       source: CameraSource.Prompt,
       quality: 100,
       correctOrientation: true,
     });
-    console.log(capturedPhoto);
-
     if (capturedPhoto.webPath) {
-      var file = new File([capturedPhoto.webPath], "image.png");
-      capturedPhoto.webPath &&
-        setPhoto({
-          file,
-          url: capturedPhoto.webPath,
-        });
+      setDocUri(capturedPhoto.webPath);
     }
   };
-  const doSomething = async () => {
+
+  const done = async () => {
     try {
-      console.log(cropState);
-      console.log(cropperRef.current, cropperRef);
       if (cropperRef.current) {
         const res = await cropperRef.current.done({ preview: true });
+        setResult(res);
       }
-      setTimeout(() => {
-        console.log(cropState);
-      }, 2000)
-      
     } catch (e) {
       console.log("error", e);
     }
   };
 
-  const removeImage = async () => {
-    setPhoto({url: '', file: null})
-  }
+  const downloadDoc = () => {
+    if (!result) {
+      return;
+    }
+    const blob: Blob = result;
+    const name = "file.jpg";
+    // For other browsers:
+    // Create a link pointing to the ObjectURL containing the blob.
+    const data = window.URL.createObjectURL(blob);
 
-  const downloadPhoto = async () => {
-    console.log(photo)
-  //   const savedFile = await Filesystem.writeFile({
-  //     path: 'test',
-  //     data: base64Data,
-  //     directory: FilesystemDirectory.Data
-  //   });
+    const link = document.createElement("a");
+    link.href = data;
+    link.download = name;
+
+    // this is necessary as link.click() does not work on the latest firefox
+    link.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      })
+    );
+
+    setTimeout(() => {
+      // For Firefox it is necessary to delay revoking the ObjectURL
+      window.URL.revokeObjectURL(data);
+      link.remove();
+    }, 100);
   };
 
-  // const onImgSelection = async (e) => {
-  //   if (e.target.files && e.target.files.length > 0) {
-  //     // it can also be a http or base64 string for example
-  //     setImg(e.target.files[0])
-  //   }
-  // }
-  console.log(photo?.file);
-  
+  const back = async () => {
+    try {
+      if (cropperRef.current) {
+        cropperRef.current.backToCrop();
+        setResult(undefined);
+      }
+    } catch (e) {
+      console.log("error", e);
+    }
+  };
 
   return (
     <div className="container">
-      <IonButton size="small" fill="outline" onClick={() => addNewToGallery()}>
-        Capture
-      </IonButton>
-      {photo && photo.url && (
-        <IonButton color="danger" onClick={() => removeImage()} fill="clear">Delete Image</IonButton>
+      <IonButton onClick={() => capture()}>Capture</IonButton>
+      {cropState && (
+        <div className="buttons-container">
+          <IonButton onClick={done}>Done</IonButton>
+          <IonButton onClick={() => back()}>Back</IonButton>
+          <IonButton
+            onClick={() => {
+              setDocUri("");
+              setCropState(undefined);
+              setResult(undefined);
+            }}
+          >
+            Reset
+          </IonButton>
+        </div>
       )}
       <Cropper
-          ref={cropperRef}
-          image={photo.url}
-          /*// @ts-ignore */
-          onChange={onChange}
-          /*// @ts-ignore */
-          onDragStop={onDragStop}
-        />
-      <br></br>
-      <br></br>
-      <IonButton onClick={doSomething}>Apply Filter</IonButton>
-      <IonButton onClick={downloadPhoto}>Download Image</IonButton>
+        ref={cropperRef}
+        image={docUri}
+        /*// @ts-ignore */
+        onChange={onChange}
+        /*// @ts-ignore */
+        onDragStop={onDragStop}
+      />
+      {result && (
+        <IonButton onClick={() => downloadDoc()}>Download Image</IonButton>
+      )}
     </div>
   );
 };
