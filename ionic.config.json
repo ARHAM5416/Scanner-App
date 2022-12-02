@@ -1,0 +1,7 @@
+{
+  "name": "scanner",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
