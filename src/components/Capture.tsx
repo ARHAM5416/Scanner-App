@@ -80,12 +80,13 @@ const Capture: React.FC<CaptureProps> = () => {
 
   return (
     <div className="container">
-      <IonButton onClick={() => capture()}>Capture</IonButton>
+      <IonButton onClick={() => capture()}>Upload / Capture</IonButton>
       {cropState && (
         <div className="buttons-container">
-          <IonButton onClick={done}>Done</IonButton>
+          <IonButton color="success" onClick={done}>Done</IonButton>
           <IonButton onClick={() => back()}>Back</IonButton>
           <IonButton
+            color="danger"
             onClick={() => {
               setDocUri("");
               setCropState(undefined);
@@ -94,19 +95,21 @@ const Capture: React.FC<CaptureProps> = () => {
           >
             Reset
           </IonButton>
+          {result && (
+            <IonButton color="dark" onClick={() => downloadDoc()}>Download Image</IonButton>
+          )}
         </div>
       )}
-      <Cropper
-        ref={cropperRef}
-        image={docUri}
-        /*// @ts-ignore */
-        onChange={onChange}
-        /*// @ts-ignore */
-        onDragStop={onDragStop}
-      />
-      {result && (
-        <IonButton onClick={() => downloadDoc()}>Download Image</IonButton>
-      )}
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Cropper
+          ref={cropperRef}
+          image={docUri}
+          /*// @ts-ignore */
+          onChange={onChange}
+          /*// @ts-ignore */
+          onDragStop={onDragStop}
+        />
+      </div>
     </div>
   );
 };
