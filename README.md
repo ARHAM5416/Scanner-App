@@ -1,6 +1,6 @@
 # Scanner-App
 
-#### [Live Preview](https://scanner-app-5g3g.vercel.app/)
+#### [Live Preview](https://ionic-react-scanner.vercel.app)
 
 ## About The Project
 
