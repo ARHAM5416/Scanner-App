@@ -4,7 +4,7 @@
 
 ## About The Project
 
-This project contains basic features of scanner application, which implements common functionalities such as: upload or take picture using camera, fix the perspective and adjust the colors with save in device option.
+This project built using [React Perspective Cropper](https://github.com/giacomocerquone/react-perspective-cropper) & contains basic features of scanner application, which implements common functionalities such as: upload or take picture using camera, fix the perspective and adjust the colors with save in device option.
 
 ### Built With
 
