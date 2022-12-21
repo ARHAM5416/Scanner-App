@@ -1,4 +1,5 @@
 # Scanner-App
+Kindly consider leaving a :star: if you like the repository.
 
 #### [Live Preview](https://ionic-react-scanner.vercel.app)
 
